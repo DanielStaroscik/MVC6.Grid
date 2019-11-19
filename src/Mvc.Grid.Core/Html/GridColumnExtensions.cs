@@ -32,20 +32,18 @@ namespace NonFactors.Mvc.Grid
         }
         public static IGridColumn<T, TValue> UsingFilterOptions<T, TValue>(this IGridColumn<T, TValue> column)
         {
-            return column.UsingFilterOptions(new[] { new SelectListItem() }
-                .Concat(column
-                .Grid
-                .Source
-                .OrderBy(column.Expression)
+            SortedSet<string> filterValues = new SortedSet<string>(
+                column.Grid.Source
                 .Select(column.Expression)
-                .Where(value => value != null)
-                .Select(value => value!.ToString())
-                .Distinct()
-                .Select(value => new SelectListItem
-                {
-                    Value = value,
-                    Text = value
-                }).ToArray()));
+                .Distinct().ToList().Select(x => x?.ToString() ?? ""));
+
+            filterValues.Add("");
+
+            return column.UsingFilterOptions(filterValues.Select(x => new SelectListItem
+            {
+                Text = x,
+                Value = x
+            }));
         }
 
         public static IGridColumn<T, TValue> UsingDefaultFilterMethod<T, TValue>(this IGridColumn<T, TValue> column, String method)
